@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 # =========================================================
@@ -76,7 +76,7 @@ print("\nRemaining columns:")
 print(df.columns.tolist())
 
 
-# In[ ]:
+# In[2]:
 
 
 # =========================================================
@@ -99,7 +99,7 @@ print("\nTotalWorkingYears by JobRole and JobLevel:")
 display(jobrole_joblevel_exp)
 
 
-# In[ ]:
+# In[3]:
 
 
 # =========================================================
@@ -160,7 +160,7 @@ for var in satisfaction_vars:
     plt.show()
 
 
-# In[ ]:
+# In[4]:
 
 
 # =========================================================
@@ -212,7 +212,7 @@ print("\nExternal market benchmark summary (monthly):")
 print(df["MarketSalary_external_monthly"].describe())
 
 
-# In[ ]:
+# In[5]:
 
 
 # =========================================================
@@ -246,7 +246,7 @@ plt.ylabel("Frequency")
 plt.show()
 
 
-# In[ ]:
+# In[6]:
 
 
 # =========================================================
@@ -301,7 +301,7 @@ plt.title("Correlation Matrix (Selected Variables)")
 plt.show()
 
 
-# In[ ]:
+# In[7]:
 
 
 # =========================================================
@@ -367,7 +367,7 @@ print("\nScaled covariates preview:")
 display(X_scaled.head())
 
 
-# In[ ]:
+# In[8]:
 
 
 # =========================================================
@@ -448,7 +448,7 @@ plt.ylabel("Frequency")
 plt.show()
 
 
-# In[ ]:
+# In[9]:
 
 
 # =========================================================
@@ -518,10 +518,9 @@ display(cluster_cate)
 # ------------------------
 # 3. Market pressure groups
 # ------------------------
-median_ratio = df["SalaryRatio_winsorized"].median()
 
 df["MarketPressureGroup"] = np.where(
-    df["SalaryRatio_winsorized"] < median_ratio,
+    df["SalaryRatio_winsorized"] < 1,
     "High Pressure",
     "Low Pressure"
 )
@@ -530,6 +529,8 @@ pressure_cate = (
     df.groupby("MarketPressureGroup")["CATE"]
     .agg(["mean", "std", "count"])
 )
+
+print(df["MarketPressureGroup"].value_counts())
 
 # Add p-values
 p_values = []
@@ -600,7 +601,49 @@ plt.xticks(rotation=0)
 plt.show()
 
 
-# In[ ]:
+# In[28]:
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Keep the order clear
+order = ["High Pressure", "Low Pressure"]
+plot_data = pressure_cate.loc[order, "mean"]
+
+fig, ax = plt.subplots(figsize=(6, 4))
+
+x = np.arange(len(plot_data))
+
+# Bar plot
+bars = ax.bar(x, plot_data.values, edgecolor="black", linewidth=1)
+
+# Add zero line
+ax.axhline(0, linestyle="--", linewidth=1)
+
+# Add marker points to make very small values visible
+ax.scatter(x, plot_data.values, s=60, color="black", zorder=3)
+
+# Add value labels
+for i, value in enumerate(plot_data.values):
+    if value < -0.001:
+        ax.text(i, value - 0.002, f"{value:.5f}", ha="center", va="top")
+    else:
+        ax.text(i, value - 0.003, f"{value:.5f}", ha="center", va="top")
+
+ax.set_xticks(x)
+ax.set_xticklabels(order)
+ax.set_title("Average Treatment Effect by Market Pressure")
+ax.set_ylabel("Mean CATE")
+ax.set_xlabel("Market Pressure Group")
+
+ax.set_ylim(-0.04, 0.005)
+
+plt.tight_layout()
+plt.show()
+
+
+# In[10]:
 
 
 # ------------------------
@@ -620,7 +663,7 @@ print("\nCATE by JobRole × JobLevel (interaction):")
 display(interaction_cate.sort_values("mean"))
 
 
-# In[ ]:
+# In[11]:
 
 
 # ------------------------
@@ -661,7 +704,7 @@ plt.legend(title="Cluster")
 plt.show()
 
 
-# In[ ]:
+# In[12]:
 
 
 # ------------------------
@@ -681,7 +724,7 @@ plt.title("CATE Heatmap: Cluster × JobLevel")
 plt.show()
 
 
-# In[ ]:
+# In[13]:
 
 
 # =========================================================
@@ -762,7 +805,7 @@ print("\nJobLevel results:")
 display(joblevel_results_df)
 
 
-# In[ ]:
+# In[14]:
 
 
 # ------------------------
@@ -799,7 +842,7 @@ print("\nInteraction results (Cluster × JobLevel):")
 display(interaction_results_df.sort_values("Mean CATE"))
 
 
-# In[ ]:
+# In[15]:
 
 
 # =========================================================
@@ -906,7 +949,7 @@ for feature_name in [
     shap.dependence_plot(feature_name, shap_matrix, X_train)
 
 
-# In[ ]:
+# In[16]:
 
 
 shap.dependence_plot(
@@ -917,7 +960,7 @@ shap.dependence_plot(
 )
 
 
-# In[ ]:
+# In[17]:
 
 
 import matplotlib as mpl
